@@ -1,3 +1,4 @@
+using Fundoo.ApiGateway.Extensions;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Ocelot.DependencyInjection;
@@ -21,7 +22,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 var ocelotFile = builder.Configuration["OcelotConfigFile"] ?? "ocelot.json";
 builder.Configuration.AddJsonFile(ocelotFile, optional: false, reloadOnChange: true);
-builder.Services.AddOcelot(builder.Configuration).AddPolly().AddConsul();
+builder.Services.AddOcelot(builder.Configuration).AddPolly().AddConsul<ConsulServiceBuilder>();
 
 // Unified Swagger UI on API Gateway
 builder.Services.AddEndpointsApiExplorer();
