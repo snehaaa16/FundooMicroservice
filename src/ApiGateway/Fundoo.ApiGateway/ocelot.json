@@ -1,0 +1,310 @@
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/swagger/docs/user/{everything}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "DownstreamPathTemplate": "/swagger/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7001
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/swagger/docs/notes/{everything}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "DownstreamPathTemplate": "/swagger/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7002
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/swagger/docs/notification/{everything}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "DownstreamPathTemplate": "/swagger/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7003
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/api/notifications/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/notifications/{everything}",
+      "DownstreamScheme": "https",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "QoSOptions": {
+        "TimeoutValue": 15000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Port": 7003,
+          "Host": "localhost"
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/auth/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/{version}/auth/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7001
+        }
+      ],
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 30
+      },
+      "QoSOptions": {
+        "TimeoutValue": 25000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/users",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/{version}/users",
+      "DownstreamScheme": "https",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 60
+      },
+      "QoSOptions": {
+        "TimeoutValue": 25000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Port": 7001,
+          "Host": "localhost"
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/users/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/{version}/users/{everything}",
+      "DownstreamScheme": "https",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 60
+      },
+      "QoSOptions": {
+        "TimeoutValue": 25000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Port": 7001,
+          "Host": "localhost"
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/notes",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/{version}/notes",
+      "DownstreamScheme": "https",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 100
+      },
+      "QoSOptions": {
+        "TimeoutValue": 8000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Port": 7002,
+          "Host": "localhost"
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/notes/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/{version}/notes/{everything}",
+      "DownstreamScheme": "https",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 100
+      },
+      "QoSOptions": {
+        "TimeoutValue": 8000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Port": 7002,
+          "Host": "localhost"
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/labels",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/{version}/labels",
+      "DownstreamScheme": "https",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 100
+      },
+      "QoSOptions": {
+        "TimeoutValue": 8000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Port": 7002,
+          "Host": "localhost"
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/labels/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/{version}/labels/{everything}",
+      "DownstreamScheme": "https",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 100
+      },
+      "QoSOptions": {
+        "TimeoutValue": 8000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      },
+      "DownstreamHostAndPorts": [
+        {
+          "Port": 7002,
+          "Host": "localhost"
+        }
+      ]
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "https://localhost:7000",
+    "ServiceDiscoveryProvider": {
+      "Scheme": "http",
+      "Host": "localhost",
+      "Port": 8500,
+      "Type": "Consul"
+    },
+    "RateLimitOptions": {
+      "ClientIdHeader": "X-Client-Id",
+      "QuotaExceededMessage": "Rate limit exceeded on load balancer. Try again later.",
+      "HttpStatusCode": 429,
+      "DisableRateLimitHeaders": false
+    }
+  }
+}

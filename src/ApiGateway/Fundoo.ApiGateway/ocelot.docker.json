@@ -1,0 +1,209 @@
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/swagger/docs/user/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/swagger/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "user-api"
+    },
+    {
+      "UpstreamPathTemplate": "/swagger/docs/notes/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/swagger/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "notes-api"
+    },
+    {
+      "UpstreamPathTemplate": "/swagger/docs/notification/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/swagger/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "notification-api"
+    },
+    {
+      "UpstreamPathTemplate": "/api/notifications/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/notifications/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "notification-api",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "QoSOptions": {
+        "TimeoutValue": 15000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/auth/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/{version}/auth/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "user-api",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 30
+      },
+      "QoSOptions": {
+        "TimeoutValue": 25000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/users",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/{version}/users",
+      "DownstreamScheme": "http",
+      "ServiceName": "user-api",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 60
+      },
+      "QoSOptions": {
+        "TimeoutValue": 25000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/users/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/{version}/users/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "user-api",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 60
+      },
+      "QoSOptions": {
+        "TimeoutValue": 25000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/notes",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/{version}/notes",
+      "DownstreamScheme": "http",
+      "ServiceName": "notes-api",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 100
+      },
+      "QoSOptions": {
+        "TimeoutValue": 8000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/notes/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/{version}/notes/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "notes-api",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 100
+      },
+      "QoSOptions": {
+        "TimeoutValue": 8000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/labels",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/{version}/labels",
+      "DownstreamScheme": "http",
+      "ServiceName": "notes-api",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 100
+      },
+      "QoSOptions": {
+        "TimeoutValue": 8000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/{version}/labels/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/{version}/labels/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "notes-api",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "PeriodTimespan": 60,
+        "Limit": 100
+      },
+      "QoSOptions": {
+        "TimeoutValue": 8000,
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 10000
+      }
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:8080",
+    "ServiceDiscoveryProvider": {
+      "Scheme": "http",
+      "Host": "consul",
+      "Port": 8500,
+      "Type": "Consul"
+    },
+    "RateLimitOptions": {
+      "ClientIdHeader": "X-Client-Id",
+      "QuotaExceededMessage": "Rate limit exceeded on load balancer. Try again later.",
+      "HttpStatusCode": 429,
+      "DisableRateLimitHeaders": false
+    }
+  }
+}
