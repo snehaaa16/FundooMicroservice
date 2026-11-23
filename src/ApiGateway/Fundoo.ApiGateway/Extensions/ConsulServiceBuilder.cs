@@ -17,4 +17,4 @@ public sealed class ConsulServiceBuilder : DefaultConsulServiceBuilder
 
     protected override string GetDownstreamHost(ServiceEntry entry, Node node)
         => entry.Service.Address;
-}\n
+}
