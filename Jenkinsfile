@@ -60,10 +60,22 @@ pipeline {
             steps {
                 sh '''#!/bin/sh
                     set -eu
-                    kubectl -n "$K8S_NAMESPACE" set image deployment/user-api user-api="$DOCKERHUB_NAMESPACE/fundoo-user-api:$IMAGE_TAG"
-                    kubectl -n "$K8S_NAMESPACE" set image deployment/notes-api notes-api="$DOCKERHUB_NAMESPACE/fundoo-notes-api:$IMAGE_TAG"
-                    kubectl -n "$K8S_NAMESPACE" set image deployment/notification-api notification-api="$DOCKERHUB_NAMESPACE/fundoo-notification-api:$IMAGE_TAG"
-                    kubectl -n "$K8S_NAMESPACE" set image deployment/api-gateway api-gateway="$DOCKERHUB_NAMESPACE/fundoo-api-gateway:$IMAGE_TAG"
+                    set_deployment_image() {
+                        deployment="$1"
+                        image="$2"
+                        container=$(kubectl -n "$K8S_NAMESPACE" get deployment "$deployment" -o jsonpath='{.spec.template.spec.containers[0].name}')
+                        if [ -z "$container" ]; then
+                            echo "No container found in deployment/$deployment" >&2
+                            exit 1
+                        fi
+                        echo "Updating deployment/$deployment container $container to $image"
+                        kubectl -n "$K8S_NAMESPACE" set image "deployment/$deployment" "$container=$image"
+                    }
+
+                    set_deployment_image user-api "$DOCKERHUB_NAMESPACE/fundoo-user-api:$IMAGE_TAG"
+                    set_deployment_image notes-api "$DOCKERHUB_NAMESPACE/fundoo-notes-api:$IMAGE_TAG"
+                    set_deployment_image notification-api "$DOCKERHUB_NAMESPACE/fundoo-notification-api:$IMAGE_TAG"
+                    set_deployment_image api-gateway "$DOCKERHUB_NAMESPACE/fundoo-api-gateway:$IMAGE_TAG"
 
                     kubectl -n "$K8S_NAMESPACE" rollout status deployment/user-api --timeout=180s
                     kubectl -n "$K8S_NAMESPACE" rollout status deployment/notes-api --timeout=180s
