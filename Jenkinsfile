@@ -15,6 +15,7 @@ pipeline {
     environment {
         DOCKERHUB_NAMESPACE = 'sneha348'
         K8S_NAMESPACE = 'fundoo-microservice'
+        KUBECONFIG = '/var/lib/jenkins/.kube/fundoo-config'
     }
 
     stages {
@@ -57,20 +58,18 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: 'fundoo-kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh '''#!/bin/sh
-                        set -eu
-                        kubectl -n "$K8S_NAMESPACE" set image deployment/user-api user-api="$DOCKERHUB_NAMESPACE/fundoo-user-api:$IMAGE_TAG"
-                        kubectl -n "$K8S_NAMESPACE" set image deployment/notes-api notes-api="$DOCKERHUB_NAMESPACE/fundoo-notes-api:$IMAGE_TAG"
-                        kubectl -n "$K8S_NAMESPACE" set image deployment/notification-api notification-api="$DOCKERHUB_NAMESPACE/fundoo-notification-api:$IMAGE_TAG"
-                        kubectl -n "$K8S_NAMESPACE" set image deployment/api-gateway api-gateway="$DOCKERHUB_NAMESPACE/fundoo-api-gateway:$IMAGE_TAG"
+                sh '''#!/bin/sh
+                    set -eu
+                    kubectl -n "$K8S_NAMESPACE" set image deployment/user-api user-api="$DOCKERHUB_NAMESPACE/fundoo-user-api:$IMAGE_TAG"
+                    kubectl -n "$K8S_NAMESPACE" set image deployment/notes-api notes-api="$DOCKERHUB_NAMESPACE/fundoo-notes-api:$IMAGE_TAG"
+                    kubectl -n "$K8S_NAMESPACE" set image deployment/notification-api notification-api="$DOCKERHUB_NAMESPACE/fundoo-notification-api:$IMAGE_TAG"
+                    kubectl -n "$K8S_NAMESPACE" set image deployment/api-gateway api-gateway="$DOCKERHUB_NAMESPACE/fundoo-api-gateway:$IMAGE_TAG"
 
-                        kubectl -n "$K8S_NAMESPACE" rollout status deployment/user-api --timeout=180s
-                        kubectl -n "$K8S_NAMESPACE" rollout status deployment/notes-api --timeout=180s
-                        kubectl -n "$K8S_NAMESPACE" rollout status deployment/notification-api --timeout=180s
-                        kubectl -n "$K8S_NAMESPACE" rollout status deployment/api-gateway --timeout=180s
-                    '''
-                }
+                    kubectl -n "$K8S_NAMESPACE" rollout status deployment/user-api --timeout=180s
+                    kubectl -n "$K8S_NAMESPACE" rollout status deployment/notes-api --timeout=180s
+                    kubectl -n "$K8S_NAMESPACE" rollout status deployment/notification-api --timeout=180s
+                    kubectl -n "$K8S_NAMESPACE" rollout status deployment/api-gateway --timeout=180s
+                '''
             }
         }
     }
