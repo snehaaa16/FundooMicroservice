@@ -70,6 +70,9 @@ public static class DependencyInjection
                     label_id UUID NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
                     PRIMARY KEY (note_id, label_id)
                 );
+
+                CREATE INDEX IF NOT EXISTS ix_notes_user_page_order
+                    ON notes (user_id, is_pinned DESC, updated_at_utc DESC, id ASC);
                 """);
             await cmd.ExecuteNonQueryAsync(ct);
         }

@@ -16,4 +16,4 @@ public class UpdateNoteRequest
 }
 
 // NAYA: v2 ki paging wali list ka response
-public record PagedResponse<T>(IReadOnlyList<T> Items, int Page, int PageSize, int Total);
+public record PagedResponse<T>(IReadOnlyList<T> Items, int Page, int PageSize, long Total);

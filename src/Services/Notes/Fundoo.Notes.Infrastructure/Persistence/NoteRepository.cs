@@ -32,20 +32,13 @@ public class NoteRepository(NpgsqlDataSource dataSource) : INoteRepository
 
     public async Task<List<Note>> ListAsync(Guid userId, NoteView view, CancellationToken ct = default)
     {
-        // filter sirf hamare fixed strings hain, user ki koi value SQL text mein nahi judti
-        var filter = view switch
-        {
-            NoteView.Active => "AND n.is_archived = FALSE AND n.is_trashed = FALSE",
-            NoteView.Archived => "AND n.is_archived = TRUE AND n.is_trashed = FALSE",
-            NoteView.Trashed => "AND n.is_trashed = TRUE",
-            _ => ""
-        };
+        var filter = GetViewFilter(view);
 
         var sql = $"""
             SELECT {NoteColumns}
             FROM notes n
             WHERE n.user_id = @userId {filter}
-            ORDER BY n.is_pinned DESC, n.updated_at_utc DESC
+            ORDER BY n.is_pinned DESC, n.updated_at_utc DESC, n.id ASC
             """;
 
         await using var conn = await dataSource.OpenConnectionAsync(ct);
@@ -62,6 +55,47 @@ public class NoteRepository(NpgsqlDataSource dataSource) : INoteRepository
 
         await LoadLabelsAsync(conn, notes, ct);
         return notes;
+    }
+
+    public async Task<(List<Note> Items, long Total)> ListPageAsync(
+        Guid userId, NoteView view, long offset, int pageSize, CancellationToken ct = default)
+    {
+        var filter = GetViewFilter(view);
+        await using var conn = await dataSource.OpenConnectionAsync(ct);
+
+        long total;
+        await using (var countCommand = new NpgsqlCommand($"""
+            SELECT COUNT(*)
+            FROM notes n
+            WHERE n.user_id = @userId {filter}
+            """, conn))
+        {
+            countCommand.Parameters.AddWithValue("userId", userId);
+            total = (long)(await countCommand.ExecuteScalarAsync(ct) ?? 0L);
+        }
+
+        var sql = $"""
+            SELECT {NoteColumns}
+            FROM notes n
+            WHERE n.user_id = @userId {filter}
+            ORDER BY n.is_pinned DESC, n.updated_at_utc DESC, n.id ASC
+            LIMIT @pageSize OFFSET @offset
+            """;
+
+        var notes = new List<Note>();
+        await using (var pageCommand = new NpgsqlCommand(sql, conn))
+        {
+            pageCommand.Parameters.AddWithValue("userId", userId);
+            pageCommand.Parameters.AddWithValue("pageSize", pageSize);
+            pageCommand.Parameters.AddWithValue("offset", offset);
+
+            await using var reader = await pageCommand.ExecuteReaderAsync(ct);
+            while (await reader.ReadAsync(ct))
+                notes.Add(ReadNote(reader));
+        }
+
+        await LoadLabelsAsync(conn, notes, ct);
+        return (notes, total);
     }
 
     public async Task AddAsync(Note note, CancellationToken ct = default)
@@ -130,6 +164,14 @@ public class NoteRepository(NpgsqlDataSource dataSource) : INoteRepository
         IsTrashed = r.GetBoolean(7),
         CreatedAtUtc = r.GetDateTime(8),
         UpdatedAtUtc = r.GetDateTime(9)
+    };
+
+    private static string GetViewFilter(NoteView view) => view switch
+    {
+        NoteView.Active => "AND n.is_archived = FALSE AND n.is_trashed = FALSE",
+        NoteView.Archived => "AND n.is_archived = TRUE AND n.is_trashed = FALSE",
+        NoteView.Trashed => "AND n.is_trashed = TRUE",
+        _ => ""
     };
 
     // Ek hi query mein saare notes ke labels (N+1 problem se bachne ke liye)

@@ -38,10 +38,10 @@ public class NotesController(INoteService notes) : ControllerBase
         page = Math.Max(page, 1);
         pageSize = Math.Clamp(pageSize, 1, 100);
 
-        var all = await notes.ListAsync(UserId, NoteView.Active, ct);
-        var items = all.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        var offset = ((long)page - 1) * pageSize;
+        var (items, total) = await notes.ListPageAsync(UserId, NoteView.Active, offset, pageSize, ct);
 
-        return Ok(new PagedResponse<NoteDto>(items, page, pageSize, all.Count));
+        return Ok(new PagedResponse<NoteDto>(items, page, pageSize, total));
     }
 
     [HttpGet("archived")]
