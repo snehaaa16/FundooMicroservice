@@ -15,5 +15,13 @@ public class UpdateNoteRequest
     public bool IsPinned { get; set; }
 }
 
-// NAYA: v2 ki paging wali list ka response
-public record PagedResponse<T>(IReadOnlyList<T> Items, int Page, int PageSize, long Total);
+// v2 paginated list metadata also explains empty and out-of-range pages.
+public record PagedResponse<T>(
+    IReadOnlyList<T> Items,
+    int Page,
+    int PageSize,
+    long Total,
+    long TotalPages,
+    bool HasPreviousPage,
+    bool HasNextPage,
+    string? Message);

@@ -7,7 +7,9 @@ public interface INoteService
     Task<NoteDto> CreateAsync(Guid userId, string title, string content, string? color, CancellationToken ct = default);
     Task<List<NoteDto>> ListAsync(Guid userId, NoteView view, CancellationToken ct = default);
     Task<(List<NoteDto> Items, long Total)> ListPageAsync(
-        Guid userId, NoteView view, long offset, int pageSize, CancellationToken ct = default);
+        Guid userId, NoteView view, long offset, int pageSize,
+        string? search, string? title, string? content, Guid? labelId,
+        CancellationToken ct = default);
     Task<NoteDto?> GetAsync(Guid userId, Guid id, CancellationToken ct = default);
     Task<NoteDto?> UpdateAsync(Guid userId, Guid id, string title, string content, string? color, bool isPinned, CancellationToken ct = default);
     Task<NoteDto?> SetArchivedAsync(Guid userId, Guid id, bool archived, CancellationToken ct = default);

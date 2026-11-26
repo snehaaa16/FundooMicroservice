@@ -58,7 +58,9 @@ public class NoteRepository(NpgsqlDataSource dataSource) : INoteRepository
     }
 
     public async Task<(List<Note> Items, long Total)> ListPageAsync(
-        Guid userId, NoteView view, long offset, int pageSize, CancellationToken ct = default)
+        Guid userId, NoteView view, long offset, int pageSize,
+        string? search, string? title, string? content, Guid? labelId,
+        CancellationToken ct = default)
     {
         var filter = GetViewFilter(view);
         await using var conn = await dataSource.OpenConnectionAsync(ct);
@@ -68,9 +70,20 @@ public class NoteRepository(NpgsqlDataSource dataSource) : INoteRepository
             SELECT COUNT(*)
             FROM notes n
             WHERE n.user_id = @userId {filter}
+              AND (@search IS NULL OR POSITION(LOWER(@search) IN LOWER(n.title)) > 0
+                   OR POSITION(LOWER(@search) IN LOWER(n.content)) > 0)
+              AND (@title IS NULL OR POSITION(LOWER(@title) IN LOWER(n.title)) > 0)
+              AND (@content IS NULL OR POSITION(LOWER(@content) IN LOWER(n.content)) > 0)
+              AND (@labelId IS NULL OR EXISTS (
+                    SELECT 1
+                    FROM note_labels nl
+                    JOIN labels l ON l.id = nl.label_id
+                    WHERE nl.note_id = n.id
+                      AND nl.label_id = @labelId
+                      AND l.user_id = @userId))
             """, conn))
         {
-            countCommand.Parameters.AddWithValue("userId", userId);
+            AddPageFilterParameters(countCommand, userId, search, title, content, labelId);
             total = (long)(await countCommand.ExecuteScalarAsync(ct) ?? 0L);
         }
 
@@ -78,6 +91,17 @@ public class NoteRepository(NpgsqlDataSource dataSource) : INoteRepository
             SELECT {NoteColumns}
             FROM notes n
             WHERE n.user_id = @userId {filter}
+              AND (@search IS NULL OR POSITION(LOWER(@search) IN LOWER(n.title)) > 0
+                   OR POSITION(LOWER(@search) IN LOWER(n.content)) > 0)
+              AND (@title IS NULL OR POSITION(LOWER(@title) IN LOWER(n.title)) > 0)
+              AND (@content IS NULL OR POSITION(LOWER(@content) IN LOWER(n.content)) > 0)
+              AND (@labelId IS NULL OR EXISTS (
+                    SELECT 1
+                    FROM note_labels nl
+                    JOIN labels l ON l.id = nl.label_id
+                    WHERE nl.note_id = n.id
+                      AND nl.label_id = @labelId
+                      AND l.user_id = @userId))
             ORDER BY n.is_pinned DESC, n.updated_at_utc DESC, n.id ASC
             LIMIT @pageSize OFFSET @offset
             """;
@@ -85,7 +109,7 @@ public class NoteRepository(NpgsqlDataSource dataSource) : INoteRepository
         var notes = new List<Note>();
         await using (var pageCommand = new NpgsqlCommand(sql, conn))
         {
-            pageCommand.Parameters.AddWithValue("userId", userId);
+            AddPageFilterParameters(pageCommand, userId, search, title, content, labelId);
             pageCommand.Parameters.AddWithValue("pageSize", pageSize);
             pageCommand.Parameters.AddWithValue("offset", offset);
 
@@ -96,6 +120,28 @@ public class NoteRepository(NpgsqlDataSource dataSource) : INoteRepository
 
         await LoadLabelsAsync(conn, notes, ct);
         return (notes, total);
+    }
+
+    private static void AddPageFilterParameters(
+        NpgsqlCommand command, Guid userId, string? search, string? title, string? content, Guid? labelId)
+    {
+        command.Parameters.AddWithValue("userId", userId);
+        command.Parameters.Add(new NpgsqlParameter("search", NpgsqlDbType.Text)
+        {
+            Value = (object?)search ?? DBNull.Value
+        });
+        command.Parameters.Add(new NpgsqlParameter("title", NpgsqlDbType.Text)
+        {
+            Value = (object?)title ?? DBNull.Value
+        });
+        command.Parameters.Add(new NpgsqlParameter("content", NpgsqlDbType.Text)
+        {
+            Value = (object?)content ?? DBNull.Value
+        });
+        command.Parameters.Add(new NpgsqlParameter("labelId", NpgsqlDbType.Uuid)
+        {
+            Value = (object?)labelId ?? DBNull.Value
+        });
     }
 
     public async Task AddAsync(Note note, CancellationToken ct = default)

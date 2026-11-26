@@ -3,7 +3,10 @@ using Fundoo.Notes.Domain.Entities;
 
 namespace Fundoo.Notes.Application.Labels;
 
-public class LabelService(ILabelRepository labels, INoteRepository notes) : ILabelService
+public class LabelService(
+    ILabelRepository labels,
+    INoteRepository notes,
+    INoteCacheService? noteCache = null) : ILabelService
 {
     public async Task<List<LabelDto>> ListAsync(Guid userId, CancellationToken ct = default) =>
         (await labels.ListAsync(userId, ct)).Select(LabelDto.From).ToList();
@@ -30,6 +33,8 @@ public class LabelService(ILabelRepository labels, INoteRepository notes) : ILab
 
         label.Name = name;
         await labels.UpdateAsync(label, ct);
+        if (noteCache is not null)
+            await noteCache.RemoveUserNotesCacheAsync(userId, ct);
         return new LabelOutcome(LabelResult.Ok, LabelDto.From(label));
     }
 
@@ -39,6 +44,8 @@ public class LabelService(ILabelRepository labels, INoteRepository notes) : ILab
         if (label is null) return LabelResult.NotFound;
 
         await labels.DeleteAsync(label, ct);     // note_labels rows ON DELETE CASCADE se hatenge
+        if (noteCache is not null)
+            await noteCache.RemoveUserNotesCacheAsync(userId, ct);
         return LabelResult.Ok;
     }
 
@@ -51,6 +58,8 @@ public class LabelService(ILabelRepository labels, INoteRepository notes) : ILab
         if (await labels.FindLinkAsync(noteId, labelId, ct) is null)
             await labels.AddLinkAsync(new NoteLabel { NoteId = noteId, LabelId = labelId }, ct);
 
+        if (noteCache is not null)
+            await noteCache.RemoveUserNotesCacheAsync(userId, ct);
         return LabelResult.Ok;
     }
 
@@ -64,6 +73,8 @@ public class LabelService(ILabelRepository labels, INoteRepository notes) : ILab
         if (link is not null)
             await labels.RemoveLinkAsync(link, ct);
 
+        if (noteCache is not null)
+            await noteCache.RemoveUserNotesCacheAsync(userId, ct);
         return LabelResult.Ok;
     }
 }

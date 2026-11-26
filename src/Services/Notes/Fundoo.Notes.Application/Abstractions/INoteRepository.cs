@@ -10,10 +10,24 @@ public interface INoteRepository
     // Production repositories should apply LIMIT/OFFSET in the database. This default
     // implementation keeps simple in-memory repositories compatible.
     async Task<(List<Note> Items, long Total)> ListPageAsync(
-        Guid userId, NoteView view, long offset, int pageSize, CancellationToken ct = default)
+        Guid userId, NoteView view, long offset, int pageSize,
+        string? search, string? title, string? content, Guid? labelId,
+        CancellationToken ct = default)
     {
-        var all = await ListAsync(userId, view, ct);
-        return (all.Skip((int)Math.Min(offset, all.Count)).Take(pageSize).ToList(), all.Count);
+        IEnumerable<Note> filtered = await ListAsync(userId, view, ct);
+        if (!string.IsNullOrWhiteSpace(search))
+            filtered = filtered.Where(n => n.Title.Contains(search, StringComparison.OrdinalIgnoreCase)
+                                           || n.Content.Contains(search, StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrWhiteSpace(title))
+            filtered = filtered.Where(n => n.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrWhiteSpace(content))
+            filtered = filtered.Where(n => n.Content.Contains(content, StringComparison.OrdinalIgnoreCase));
+        if (labelId.HasValue)
+            filtered = filtered.Where(n => n.NoteLabels.Any(nl => nl.LabelId == labelId.Value));
+
+        var matching = filtered.ToList();
+        var safeOffset = (int)Math.Clamp(offset, 0L, matching.Count);
+        return (matching.Skip(safeOffset).Take(pageSize).ToList(), matching.Count);
     }
 
     Task AddAsync(Note note, CancellationToken ct = default);

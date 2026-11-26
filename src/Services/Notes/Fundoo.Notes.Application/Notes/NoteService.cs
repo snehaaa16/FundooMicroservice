@@ -46,11 +46,14 @@ public class NoteService(INoteRepository repo, INoteCacheService? cache = null) 
     }
 
     public async Task<(List<NoteDto> Items, long Total)> ListPageAsync(
-        Guid userId, NoteView view, long offset, int pageSize, CancellationToken ct = default)
+        Guid userId, NoteView view, long offset, int pageSize,
+        string? search, string? title, string? content, Guid? labelId,
+        CancellationToken ct = default)
     {
         // Paginated requests deliberately bypass the all-notes cache so only one page
         // and its labels are read from storage.
-        var (notes, total) = await repo.ListPageAsync(userId, view, offset, pageSize, ct);
+        var (notes, total) = await repo.ListPageAsync(
+            userId, view, offset, pageSize, search, title, content, labelId, ct);
         return (notes.Select(NoteDto.From).ToList(), total);
     }
 

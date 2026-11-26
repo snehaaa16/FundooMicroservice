@@ -1,0 +1,38 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-fundoo
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-fundoo-account
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: traefik
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fundoo-public-https
+  namespace: fundoo-microservice
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-fundoo
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - 20-255-74-48.sslip.io
+      secretName: fundoo-sslip-tls
+  rules:
+    - host: 20-255-74-48.sslip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
